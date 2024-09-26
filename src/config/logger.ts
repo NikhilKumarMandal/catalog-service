@@ -1,38 +1,32 @@
-import { createLogger, format, transports } from "winston";
-import { Config } from ".";
-const { combine, timestamp, json, colorize, printf } = format;
+import winston from "winston";
 
-// Custom format for console logging with colors
-const consoleLogFormat = combine(
-  colorize(),
-  timestamp(),
-  printf(({ level, message, timestamp }) => {
-    return `${timestamp} ${level}: ${message}`;
-  })
-);
-
-// Create a Winston logger
-const logger = createLogger({
-  level: "info",
-  format: combine(timestamp(), json()),
-  transports: [
-    new transports.Console({
-      format: consoleLogFormat,
-      silent: Config.NODE_ENV === "test",
-    }),
-    new transports.File({
-      filename: "app.log",
-      dirname: "logs",
-      level: "info",
-      silent: Config.NODE_ENV === "test",
-    }),
-    new transports.File({
-      filename: "error.log",
-      dirname: "logs",
-      level: "error",
-      silent: Config.NODE_ENV === "test",
-    }),
-  ],
+const logger = winston.createLogger({
+    level: "info",
+    defaultMeta: {
+        serviceName: "auth-service",
+    },
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json(),
+    ),
+    transports: [
+        new winston.transports.File({
+            dirname: "logs",
+            filename: "combined.log",
+            level: "info",
+            silent: process.env.NODE_ENV === "test",
+        }),
+        new winston.transports.File({
+            dirname: "logs",
+            filename: "error.log",
+            level: "error",
+            silent: process.env.NODE_ENV === "test",
+        }),
+        new winston.transports.Console({
+            level: "info",
+            silent: process.env.NODE_ENV === "test",
+        }),
+    ],
 });
 
 export default logger;
