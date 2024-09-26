@@ -1,11 +1,13 @@
 import app from "./app";
-import { Config } from "./config";
+import config from "config"
 import logger from "./config/logger";
 
 const startServer = () => {
+  const PORT: number = config.get("server.port") || 5502
   try {
-    app.listen(Config.PORT, () => {
-      logger.info(`Listening on port ${Config.PORT}`);
+    app.listen(PORT, () => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.info(`Listening on port ${PORT}`);
     });
   } catch (error) {
     if (error instanceof Error) {
