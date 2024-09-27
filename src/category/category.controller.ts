@@ -1,8 +1,9 @@
-import {Request,Response } from "express";
+import {NextFunction, Request,Response } from "express";
 import { validationResult } from "express-validator";
 import { Category } from "./category.types";
 import { CategoryService } from "./category.service";
 import { Logger } from "winston";
+import createHttpError from "http-errors";
 
 
 
@@ -43,5 +44,19 @@ export class CategoryController {
         this.logger.info("Fetched Category Details");
 
         res.status(201).json(categories)
+    }
+
+    async getOne(req: Request, res: Response,next:NextFunction) {
+        const { categoryId } = req.params;
+
+        const category = await this.categoryService.getOne(categoryId);
+
+        if (!category) {
+            return next(createHttpError(404, "Category not found"));
+        }
+        
+        this.logger.info(`Getting category`, { id: category._id });
+
+        res.status(201).json(category);
     }
 }
