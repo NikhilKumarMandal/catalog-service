@@ -35,4 +35,13 @@ export class CategoryController {
     
         res.json({id:category._id})
     }
+
+    async getAll(req: Request, res: Response) {
+        
+        const categories = await this.categoryService.getAll();
+
+        this.logger.info("Fetched Category Details");
+
+        res.status(201).json(categories)
+    }
 }
