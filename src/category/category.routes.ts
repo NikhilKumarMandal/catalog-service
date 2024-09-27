@@ -5,6 +5,8 @@ import { CategoryService } from "./category.service";
 import logger from "../config/logger";
 import { asyncWrapper } from "../utils";
 import authenticate from "../middlewares/authenticate";
+import { canAccess } from "../middlewares/canAccess";
+import { Roles } from "../common/constant";
 ;
 const router = express.Router()
 
@@ -19,6 +21,7 @@ const categoryController = new CategoryController(categoryService,logger)
 
 router.post("/",
     authenticate,
+    canAccess([Roles.ADMIN]),
     categoryValidator,
     asyncWrapper(categoryController.create)
 )
