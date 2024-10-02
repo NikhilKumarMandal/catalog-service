@@ -8,6 +8,7 @@ import { Product } from "./product.controller";
 import { ProductService } from "./product.service";
 import logger from "../config/logger";
 import { upload } from "../middlewares/multer";
+import updateProductValidator from "./update.product.validator";
 // import { upload } from "../middlewares/multer";
 
 const router = express.Router()
@@ -32,6 +33,19 @@ router.post(
     ]),
     createProductValidator,
     asyncWrapper(productController.create)
+)
+
+router.patch(
+    "/:productId",
+    authenticate,
+    canAccess([Roles.ADMIN,Roles.MANAGER]),
+    upload.fields([
+        {
+            name: "image",
+        }, 
+    ]),
+    updateProductValidator,
+    asyncWrapper(productController.update)
 )
 
 
