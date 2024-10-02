@@ -13,3 +13,14 @@ export interface Product {
     url: string;        
   };
 }
+
+export interface Filter {
+    tenantId?: string;
+    catagoryId?: mongoose.Types.ObjectId;
+    isPublish?: boolean
+}
+
+export interface PaginateQuery {
+    page: number;
+    limit: number;
+}

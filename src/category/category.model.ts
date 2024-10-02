@@ -36,7 +36,7 @@ const priceConfigurationSchema = new mongoose.Schema<PriceConfiguration>({
     }
 })
 
-const productSchema = new mongoose.Schema<Category>({
+const categorySchema = new mongoose.Schema<Category>({
     name: {
         type: String,
         required: true
@@ -55,4 +55,4 @@ const productSchema = new mongoose.Schema<Category>({
         timestamps: true
     })
 
-export default mongoose.model("Product", productSchema);
+export default mongoose.model("Category", categorySchema);

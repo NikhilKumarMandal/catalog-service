@@ -6,6 +6,8 @@ import createHttpError from "http-errors";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils";
 import { AuthRequest } from "../common/types/types";
 import { Roles } from "../common/constant";
+import mongoose from "mongoose";
+import { Filter } from "./product.type";
 
 
 export class Product {
@@ -162,6 +164,39 @@ export class Product {
     this.logger.info("Product updated successfully",{id: productId})
     res.json({id: productId})
 
+  }
+
+  index = async (req: Request, res: Response, next: NextFunction) => {
+
+    const { q, tenantId, categoryId, isPublish, page = 1, limit = 10 } = req.query;
+
+    const filters: Filter = {}
+
+    if (isPublish === "true") filters.isPublish = true;
+    
+    if (tenantId) filters.tenantId = tenantId as string;
+
+    if (
+      categoryId &&
+      mongoose.Types.ObjectId.isValid(categoryId as string)
+    ) {
+      filters.catagoryId = new mongoose.Types.ObjectId(categoryId as string) ;
+    }
+
+    const pageNumber = Math.max(1, parseInt(page as string, 10)); 
+    const limitNumber = Math.max(1, parseInt(limit as string, 10));
+
+    const products = await this.productService.getProductsData(
+      q as string,
+      filters,
+      {
+        page: pageNumber,
+        limit: limitNumber,
+      },
+      );
+
+    res.status(200).json( products );
+    
   }
 }
 

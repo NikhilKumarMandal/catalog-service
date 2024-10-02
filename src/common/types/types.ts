@@ -1,4 +1,5 @@
 import { Request } from "express";
+import mongoose from "mongoose";
 
 export type AuthCookie = {
     accessToken: string;
@@ -13,3 +14,4 @@ export interface AuthRequest extends Request {
         tenant: string;
     };
 }
+
