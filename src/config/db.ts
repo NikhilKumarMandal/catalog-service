@@ -6,8 +6,15 @@ import { DB_NAME } from "../utils";
 
 export const db = async () => {
     try {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        await mongoose.connect(`${config.get("database.url")}/${DB_NAME}`);
+    const dbUrl = `${config.get("database.url")}/${DB_NAME}`;
+
+    if (!dbUrl) {
+      throw new Error("Database URL not provided in configuration.");
+    }
+
+    await mongoose.connect(dbUrl, {
+      serverSelectionTimeoutMS: 50000,  
+    });
         logger.info("Database connected successfully");
     } catch (error) {
         logger.error("Error connecting to the database", error);

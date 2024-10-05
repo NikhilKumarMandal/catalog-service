@@ -26,7 +26,7 @@ router.post("/",
     asyncWrapper(categoryController.create)
 )
 
-router.get("/", asyncWrapper(categoryController.getAll))
+router.get("/", categoryController.getAll)
 router.get("/:categoryId", asyncWrapper(categoryController.getOne));
 
 

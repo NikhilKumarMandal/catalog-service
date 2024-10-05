@@ -16,7 +16,7 @@ export interface Product {
 
 export interface Filter {
     tenantId?: string;
-    catagoryId?: mongoose.Types.ObjectId;
+    categoryId?: mongoose.Types.ObjectId;
     isPublish?: boolean
 }
 
