@@ -8,12 +8,14 @@ import { AuthRequest } from "../common/types/types";
 import { Roles } from "../common/constant";
 import mongoose from "mongoose";
 import { Filter } from "./product.type";
+import { MessageProducerBroker } from '../common/types/broker';
 
 
 export class Product {
   constructor(
     private productService: ProductService,
-    private logger: Logger
+    private logger: Logger,
+    private broker: MessageProducerBroker
   ) {}
 
   create = async (req: Request, res: Response, next: NextFunction) => {
@@ -69,6 +71,7 @@ export class Product {
       // Create a new product using ProductService
       const newProduct = await this.productService.create(product);
 
+      this.broker.sendMessage("product",JSON.stringify({id: newProduct._id,priceConfiguration: newProduct.priceConfiguration}))
       // Send a success response
       res.status(200).json({ id: newProduct._id });
       
@@ -158,10 +161,18 @@ export class Product {
     
 
     const updatedProduct = await this.productService.updateProduct(productId, productToUpdate)
+
     if (!updatedProduct) {
       return next(createHttpError(500,"Something went while updating product details!"))
     }
-    this.logger.info("Product updated successfully",{id: productId})
+
+    this.logger.info("Product updated successfully", { id: productId });
+
+    this.broker.sendMessage("product", JSON.stringify({
+      id: updatedProduct._id,
+      priceConfiguration: updatedProduct.priceConfiguration
+    }))
+    
     res.json({id: productId})
 
   }

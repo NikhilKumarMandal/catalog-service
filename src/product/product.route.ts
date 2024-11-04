@@ -9,14 +9,15 @@ import { ProductService } from "./product.service";
 import logger from "../config/logger";
 import { upload } from "../middlewares/multer";
 import updateProductValidator from "./update.product.validator";
+import { createMessageProducerBroker } from "../common/factories/brokerFactory";
 // import { upload } from "../middlewares/multer";
 
 const router = express.Router()
 
 
 const productService = new ProductService()
-
-const productController = new Product(productService,logger)
+const broker = createMessageProducerBroker()
+const productController = new Product(productService,logger,broker)
 
 
 
