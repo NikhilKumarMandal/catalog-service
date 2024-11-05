@@ -1,8 +1,8 @@
 import { NextFunction, Request,Response } from "express"
 import { ToppingService } from "./topping.services"
 import { Logger } from "winston"
-import { uploadOnCloudinary } from "../utils";
-import { Topping } from "./topping.types";
+import { mapToObject, uploadOnCloudinary } from "../utils";
+import { Topping, ToppingEvents } from "./topping.types";
 import createHttpError from "http-errors";
 import { validationResult } from "express-validator";
 import { MessageProducerBroker } from "../common/types/broker";
@@ -53,7 +53,22 @@ export class ToppingController{
         
             this.logger.info("Topping created successfully!")
             
-            this.broker.sendMessage("topping",JSON.stringify({id: savedTopping._id,priceConfiguration: savedTopping.price}))
+               await this.broker.sendMessage(
+            "product",
+            JSON.stringify({
+                event_type: ToppingEvents.TOPPING_CREATE,
+                data: {
+                    id: savedTopping._id,
+                    // todo: fix the typescript error
+                    priceConfiguration: mapToObject(
+                        savedTopping.price as unknown as Map<
+                            string,
+                            any
+                        >,
+                    ),
+                },
+            }),
+        );
             
         res.json({ id: savedTopping._id });
             

@@ -3,11 +3,11 @@ import { NextFunction, Request, Response } from "express";
 import { ProductService } from "./product.service";
 import { Logger } from "winston";
 import createHttpError from "http-errors";
-import { deleteFromCloudinary, uploadOnCloudinary } from "../utils";
+import { deleteFromCloudinary, mapToObject, uploadOnCloudinary } from "../utils";
 import { AuthRequest } from "../common/types/types";
 import { Roles } from "../common/constant";
 import mongoose from "mongoose";
-import { Filter } from "./product.type";
+import { Filter, ProductEvents } from "./product.type";
 import { MessageProducerBroker } from '../common/types/broker';
 
 
@@ -71,7 +71,22 @@ export class Product {
       // Create a new product using ProductService
       const newProduct = await this.productService.create(product);
 
-      this.broker.sendMessage("product",JSON.stringify({id: newProduct._id,priceConfiguration: newProduct.priceConfiguration}))
+       await this.broker.sendMessage(
+            "product",
+            JSON.stringify({
+                event_type: ProductEvents.PRODUCT_CREATE,
+                data: {
+                    id: newProduct._id,
+                    // todo: fix the typescript error
+                    priceConfiguration: mapToObject(
+                        newProduct.priceConfiguration as unknown as Map<
+                            string,
+                            any
+                        >,
+                    ),
+                },
+            }),
+        );
       // Send a success response
       res.status(200).json({ id: newProduct._id });
       
@@ -168,10 +183,22 @@ export class Product {
 
     this.logger.info("Product updated successfully", { id: productId });
 
-    this.broker.sendMessage("product", JSON.stringify({
-      id: updatedProduct._id,
-      priceConfiguration: updatedProduct.priceConfiguration
-    }))
+       await this.broker.sendMessage(
+            "product",
+            JSON.stringify({
+                event_type: ProductEvents.PRODUCT_CREATE,
+                data: {
+                    id: updatedProduct._id,
+                    // todo: fix the typescript error
+                    priceConfiguration: mapToObject(
+                        updatedProduct.priceConfiguration as unknown as Map<
+                            string,
+                            any
+                        >,
+                    ),
+                },
+            }),
+        );
     
     res.json({id: productId})
 
