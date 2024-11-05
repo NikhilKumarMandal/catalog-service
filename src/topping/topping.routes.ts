@@ -7,10 +7,12 @@ import { canAccess } from "../middlewares/canAccess";
 import { Roles } from "../common/constant";
 import { upload } from "../middlewares/multer";
 import { asyncWrapper } from "../utils";
+import { createMessageProducerBroker } from "../common/factories/brokerFactory";
 
 const router = Router();
 const toppingService = new ToppingService()
-const toppingCotroller = new ToppingController(toppingService,logger)
+const broker = createMessageProducerBroker(); 
+const toppingCotroller = new ToppingController(toppingService,logger,broker)
 
 router.post(
     "/create",

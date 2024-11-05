@@ -5,11 +5,13 @@ import { uploadOnCloudinary } from "../utils";
 import { Topping } from "./topping.types";
 import createHttpError from "http-errors";
 import { validationResult } from "express-validator";
+import { MessageProducerBroker } from "../common/types/broker";
 
 export class ToppingController{
     constructor(
         private toppingService: ToppingService,
-        private logger: Logger
+        private logger: Logger,
+        private broker: MessageProducerBroker
     ) { }
     
     create = async (req: Request, res: Response, next: NextFunction) => {
@@ -49,7 +51,9 @@ export class ToppingController{
             tenantId: req.body.tenantId,
         } as Topping);
         
-        this.logger.info("Topping created successfully!")
+            this.logger.info("Topping created successfully!")
+            
+            this.broker.sendMessage("topping",JSON.stringify({id: savedTopping._id,priceConfiguration: savedTopping.price}))
             
         res.json({ id: savedTopping._id });
             
