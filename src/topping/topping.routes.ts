@@ -26,4 +26,5 @@ router.post(
     asyncWrapper(toppingCotroller.create)
 )
 
+router.get("/", asyncWrapper(toppingCotroller.get));
 export default router

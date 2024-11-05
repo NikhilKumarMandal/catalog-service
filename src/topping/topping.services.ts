@@ -8,4 +8,9 @@ export class ToppingService{
     async create(topping: Topping) {
         return await toppingModel.create(topping);
     }
+
+    async getAll(tenantId: string) {
+        // todo: !Important, add pagination
+        return await toppingModel.find({ tenantId });
+    }
 }

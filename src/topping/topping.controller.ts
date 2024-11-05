@@ -57,6 +57,27 @@ export class ToppingController{
             return next(error);
         }
     }
+
+     get = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const toppings = await this.toppingService.getAll(
+                req.query.tenantId as string,
+            );
+
+            const readyToppings = toppings.map((topping:Topping) => {
+                return {
+                    id: topping._id as string,
+                    name: topping.name,
+                    price: topping.price,
+                    tenantId: topping.tenantId,
+                    image: topping.image.url,
+                };
+            });
+            res.json(readyToppings);
+        } catch (err) {
+            return next(err);
+        }
+    };
 }
 
 
