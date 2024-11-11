@@ -1,38 +1,72 @@
 import { MessageProducerBroker } from './common/types/broker';
 import app from "./app";
-import config from "config"
+import config from "config";
 import logger from "./config/logger";
 import { db } from "./config/db";
 import { createMessageProducerBroker } from './common/factories/brokerFactory';
 
-
-
-const PORT: number = config.get("server.port") || 5502
+const PORT: number = config.get("server.port") || 5502;
 let messageProduceBroker: MessageProducerBroker | null = null;
-db().then(async () => {
+
+async function startServer() {
+  try {
+    // Connect to the database
+    await db();
+
     // Handle application error events
     app.on("error", (error) => {
       if (error instanceof Error) {
-       logger.error(error.message);
+        logger.error(error.message, error.stack);
       }
     });
-  messageProduceBroker = createMessageProducerBroker()
-  
-  await messageProduceBroker.connect()
+
+    // Initialize the message broker and connect with retries
+    messageProduceBroker = createMessageProducerBroker();
+    await retryConnectBroker(messageProduceBroker);
 
     // Start the server
     app.listen(PORT, () => {
-        logger.info(`⚙️  Server is running at port : ${PORT}`);
+      logger.info(`⚙️  Server is running at port : ${PORT}`);
     });
 
-}).catch((err) => {
-  if (err instanceof Error) {
+    // Graceful shutdown on process termination signals
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+
+  } catch (err) {
+    if (err instanceof Error) {
       if (messageProduceBroker) {
-        messageProduceBroker.disconnect()
+        await messageProduceBroker.disconnect();
       }
-      logger.error(err.message);
+      logger.error("Startup error: " + err.message, err.stack);
       setTimeout(() => {
         process.exit(1);
       }, 1000);
     }
-});
+  }
+}
+
+async function retryConnectBroker(broker: MessageProducerBroker, retries = 5, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await broker.connect();
+      return;
+    } catch (error) {
+      logger.error(`Broker connection attempt ${i + 1} failed. Retrying...`);
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+async function shutdown() {
+  logger.info("Shutting down gracefully...");
+  if (messageProduceBroker) {
+    await messageProduceBroker.disconnect();
+  }
+  process.exit(0);
+}
+
+// Start the server
+startServer();
+

@@ -186,7 +186,7 @@ export class Product {
        await this.broker.sendMessage(
             "product",
             JSON.stringify({
-                event_type: ProductEvents.PRODUCT_CREATE,
+                event_type: ProductEvents.PRODUCT_UPDATE,
                 data: {
                     id: updatedProduct._id,
                     // todo: fix the typescript error
