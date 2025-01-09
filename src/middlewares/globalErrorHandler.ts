@@ -1,12 +1,14 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HttpError } from "http-errors";
 import { v4 as uuid } from "uuid";
 import logger from "../config/logger";
 
+// ts-@ignore
 export const globalErrorHandler = (
   err: HttpError,
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const errorId = uuid();

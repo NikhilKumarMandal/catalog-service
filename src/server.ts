@@ -46,18 +46,21 @@ async function startServer() {
   }
 }
 
-async function retryConnectBroker(broker: MessageProducerBroker, retries = 5, delay = 2000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      await broker.connect();
-      return;
-    } catch (error) {
-      logger.error(`Broker connection attempt ${i + 1} failed. Retrying...`);
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delay));
+async function retryConnectBroker(broker: MessageProducerBroker, retries = 5, delay = 5000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            logger.info(`Attempting broker connection (${i + 1}/${retries})...`);
+            await broker.connect();
+            logger.info("Broker connected successfully.");
+            return;
+        } catch (error) {
+            logger.error(`Broker connection attempt ${i + 1} failed: ${(error as Error).message}`);
+            if (i === retries - 1) throw error; // Throw after last retry
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
     }
-  }
 }
+
 
 async function shutdown() {
   logger.info("Shutting down gracefully...");

@@ -30,7 +30,6 @@ router.post(
             name: "image",
             maxCount: 1
         }, 
-        
     ]),
     createProductValidator,
     asyncWrapper(productController.create)
@@ -43,6 +42,7 @@ router.patch(
     upload.fields([
         {
             name: "image",
+            maxCount: 1
         }, 
     ]),
     updateProductValidator,
